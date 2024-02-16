@@ -15,7 +15,12 @@ const app = express();
 const PORT= process.env.PORT || 5000;
     
 app.use(bodyParser.json());
-app.use(cors());
+const corsOptions = {
+    origin: '*', // Autoriser toutes les origines
+    credentials: true // Autorise l'envoi de cookies avec les requêtes
+  };
+  
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
 apiRouter.use(cookieParser());
