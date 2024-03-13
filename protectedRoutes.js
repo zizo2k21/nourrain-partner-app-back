@@ -1,21 +1,25 @@
 //routes protegés
-const express =require('express');
+const express = require("express");
 const protectedRouter = express.Router();
-const db = require('./db.js');
-const verifyToken = require('./verifyToken');
+const db = require("./db.js");
+const verifyToken = require("./verifyToken");
 
-protectedRouter.use('/', verifyToken);
+protectedRouter.use("/", verifyToken);
 
 //ajout d'offre
-protectedRouter.post('/offers', async (req, res, next)=>{
+protectedRouter.post("/offers", async (req, res, next) => {
   try {
-    const {description, credits, details} = req.body;
-    if(!description || !credits || !details || !req.authData.id_partenaire){
+    const { description, credits, details } = req.body;
+    if (!description || !credits || !details || !req.authData.id_partenaire) {
       return res.sendStatus(400);
     }
-    const offer = await db.insertOffer(description, credits, details, req.authData.id_partenaire);
+    const offer = await db.insertOffer(
+      description,
+      credits,
+      details,
+      req.authData.id_partenaire
+    );
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -23,25 +27,29 @@ protectedRouter.post('/offers', async (req, res, next)=>{
 });
 
 //modification d'offre
-protectedRouter.put('/offers/:id', async (req, res, next)=>{
+protectedRouter.put("/offers/:id", async (req, res, next) => {
   try {
-    if(!req.params.id){
-        return res.sendStatus(400);
-      }
-    const {description, credits, details} = req.body;
-    if(!description || !credits || !details || !req.authData.id_partenaire){
+    if (!req.params.id) {
+      return res.sendStatus(400);
+    }
+    const { description, credits, details } = req.body;
+    if (!description || !credits || !details || !req.authData.id_partenaire) {
       return res.sendStatus(400);
     }
     const existingoffer = await db.oneOffer(req.params.id);
-    if(!existingoffer){
+    if (!existingoffer) {
       return res.sendStatus(400);
     }
-    if(req.authData.id_partenaire !== existingoffer.id_partenaire){
+    if (req.authData.id_partenaire !== existingoffer.id_partenaire) {
       return res.sendStatus(400);
     }
-    const offer = await db.updateOffer(req.params.id, description, credits, details);
+    const offer = await db.updateOffer(
+      req.params.id,
+      description,
+      credits,
+      details
+    );
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -49,21 +57,20 @@ protectedRouter.put('/offers/:id', async (req, res, next)=>{
 });
 
 //supression d'offre
-protectedRouter.delete('/offers/:id', async (req, res, next)=>{
+protectedRouter.delete("/offers/:id", async (req, res, next) => {
   try {
-    if(!req.params.id){
-        return res.sendStatus(400);
-      }
-    const existingoffer = await db.oneOffer(req.params.id);
-    if(!existingoffer){
+    if (!req.params.id) {
       return res.sendStatus(400);
     }
-    if(req.authData.id_partenaire !== existingoffer.id_partenaire){
+    const existingoffer = await db.oneOffer(req.params.id);
+    if (!existingoffer) {
+      return res.sendStatus(400);
+    }
+    if (req.authData.id_partenaire !== existingoffer.id_partenaire) {
       return res.sendStatus(400);
     }
     const offer = await db.deleteOffer(req.params.id);
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -71,11 +78,10 @@ protectedRouter.delete('/offers/:id', async (req, res, next)=>{
 });
 
 //get toutes les offres par partenaire
-protectedRouter.get('/offers', async (req, res, next)=>{
+protectedRouter.get("/offers", async (req, res, next) => {
   try {
     const offers = await db.allOfferbyPart(req.authData.id_partenaire);
     res.status(200).json(offers);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -83,36 +89,49 @@ protectedRouter.get('/offers', async (req, res, next)=>{
 });
 
 //get une offre
-protectedRouter.get('/offers/:id', async (req, res, next)=>{
+protectedRouter.get("/offers/:id", async (req, res, next) => {
   try {
-    if(!req.params.id){
-        return res.sendStatus(400);
-      }
+    if (!req.params.id) {
+      return res.sendStatus(400);
+    }
     const offer = await db.oneOffer(req.params.id);
     //check que c'est bien le partenaire qui a l'offre
-    if(req.authData.id_partenaire !== offer.id_partenaire){
+    if (req.authData.id_partenaire !== offer.id_partenaire) {
       return res.sendStatus(400);
     }
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
   }
 });
 
-
 //Events
 
-protectedRouter.post('/events', async (req, res, next)=>{
+protectedRouter.post("/events", async (req, res, next) => {
   try {
-    const {titre, description, date_debut, date_fin, lieu, details} = req.body;
-    if(!titre || !description || !date_debut || !date_fin || !lieu || !req.authData.id_partenaire){
+    const { titre, description, date_debut, date_fin, lieu, details } =
+      req.body;
+    if (
+      !titre ||
+      !description ||
+      !date_debut ||
+      !date_fin ||
+      !lieu ||
+      !req.authData.id_partenaire
+    ) {
       return res.sendStatus(400);
     }
-    const offer = await db.insertEvent(titre, description, date_debut, date_fin, req.authData.id_partenaire, lieu, details);
+    const offer = await db.insertEvent(
+      titre,
+      description,
+      date_debut,
+      date_fin,
+      req.authData.id_partenaire,
+      lieu,
+      details
+    );
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -120,25 +139,41 @@ protectedRouter.post('/events', async (req, res, next)=>{
 });
 
 //modificattion event
-protectedRouter.put('/events/:id', async (req, res, next)=>{
+protectedRouter.put("/events/:id", async (req, res, next) => {
   try {
-    if(!req.params.id){
-        return res.sendStatus(400);
-      }
-    const {titre, description, date_debut, date_fin, lieu, details} = req.body;
-    if(!titre || !description || !date_debut || !date_fin || !lieu || !details || !req.authData.id_partenaire){
+    if (!req.params.id) {
+      return res.sendStatus(400);
+    }
+    const { titre, description, date_debut, date_fin, lieu, details } =
+      req.body;
+    if (
+      !titre ||
+      !description ||
+      !date_debut ||
+      !date_fin ||
+      !lieu ||
+      !details ||
+      !req.authData.id_partenaire
+    ) {
       return res.sendStatus(400);
     }
     const existingevent = await db.oneEvent(req.params.id);
-    if(!existingevent){
+    if (!existingevent) {
       return res.sendStatus(400);
     }
-    if(req.authData.id_partenaire !== existingevent.id_partenaire){
+    if (req.authData.id_partenaire !== existingevent.id_partenaire) {
       return res.sendStatus(400);
     }
-    const offer = await db.updateEvent(req.params.id, titre, description, date_debut, date_fin, lieu, details);
+    const offer = await db.updateEvent(
+      req.params.id,
+      titre,
+      description,
+      date_debut,
+      date_fin,
+      lieu,
+      details
+    );
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -146,21 +181,20 @@ protectedRouter.put('/events/:id', async (req, res, next)=>{
 });
 
 //suppression event
-protectedRouter.delete('/events/:id', async (req, res, next)=>{
+protectedRouter.delete("/events/:id", async (req, res, next) => {
   try {
-    if(!req.params.id){
-        return res.sendStatus(400);
-      }
-    const existingevent = await db.oneEvent(req.params.id);
-    if(!existingevent){
+    if (!req.params.id) {
       return res.sendStatus(400);
     }
-    if(req.authData.id_partenaire !== existingevent.id_partenaire){
+    const existingevent = await db.oneEvent(req.params.id);
+    if (!existingevent) {
+      return res.sendStatus(400);
+    }
+    if (req.authData.id_partenaire !== existingevent.id_partenaire) {
       return res.sendStatus(400);
     }
     const offer = await db.deleteEvent(req.params.id);
     res.status(200).json(offer);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -168,11 +202,10 @@ protectedRouter.delete('/events/:id', async (req, res, next)=>{
 });
 
 //get les events par partenaire
-protectedRouter.get('/events', async (req, res, next)=>{
+protectedRouter.get("/events", async (req, res, next) => {
   try {
     const events = await db.allEventbyPart(req.authData.id_partenaire);
     res.status(200).json(events);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
@@ -180,24 +213,21 @@ protectedRouter.get('/events', async (req, res, next)=>{
 });
 
 //get un event
-protectedRouter.get('/events/:id', async (req, res, next)=>{
+protectedRouter.get("/events/:id", async (req, res, next) => {
   try {
-    if(!req.params.id){
-        return res.sendStatus(400);
-      }
+    if (!req.params.id) {
+      return res.sendStatus(400);
+    }
     const event = await db.oneEvent(req.params.id);
     //check que c'est bien le partenaire qui a l'event
-    if(req.authData.id_partenaire !== event.id_partenaire){
+    if (req.authData.id_partenaire !== event.id_partenaire) {
       return res.sendStatus(400);
     }
     res.status(200).json(event);
-    
   } catch (error) {
     console.log(error);
     res.sendStatus(400);
   }
 });
 
-
 module.exports = protectedRouter;
-
